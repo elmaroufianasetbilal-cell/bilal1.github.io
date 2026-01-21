@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" id="metaDescription" content="منصة ويب ذكية لتحويل جميع الوحدات مع تصميم جذاب وسهل الاستخدام.">
+  <title>محول الوحدات الذكي</title>
+
+  <!-- أسلوب تصميم متقدم -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main-color: #00acc1;
+      --card-bg: #fff;
+      --bg-color: #f0f8ff;
+      --text-color: #000;
+    }
+    [data-theme="dark"] {
+      --main-color: #00bfa5;
+      --card-bg: #121212;
+      --bg-color: #1c1c1c;
+      --text-color: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      transition: all 0.3s ease;
+    }
+
+    header {
+      background-color: var(--main-color);
+      padding: 20px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      color: #fff;
+    }
+    header h1 { margin: 0; }
+
+    #settings {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+    }
+
+    #languageSelector, #themeSelector {
+      padding: 6px;
+      border-radius: 5px;
+      border: none;
+      margin-left: 5px;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 20px;
+      gap: 10px;
+    }
+    .tab {
+      padding: 10px 20px;
+      background-color: var(--main-color);
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .tab:hover { transform: scale(1.05); }
+
+    .tab.active {
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      font-weight: bold;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      padding: 20px;
+      border-radius: 15px;
+      width: 300px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+      text-align: center;
+    }
+    .card:hover { transform: translateY(-5px); }
+
+    .card h3 {
+      margin-top: 0;
+      color: var(--main-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: var(--main-color);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover { background-color: #007c91; }
+
+    #result { font-weight: bold; color: var(--main-color); margin-top: 10px; }
+  </style>
+</head>
+<body data-theme="light">
+
+<header>
+  <h1 id="title">محول الوحدات الذكي</h1>
+  <div id="settings">
+    <select id="languageSelector" onchange="changeLanguage()">
+      <option value="ar">العربية</option>
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+      <option value="es">Español</option>
+    </select>
+    <select id="themeSelector" onchange="changeTheme()">
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-tab="length" onclick="showTab('length')">الطول</div>
+  <div class="tab" data-tab="weight" onclick="showTab('weight')">الوزن</div>
+  <div class="tab" data-tab="temperature" onclick="showTab('temperature')">درجة الحرارة</div>
+  <div class="tab" data-tab="area" onclick="showTab('area')">المساحة</div>
+  <div class="tab" data-tab="volume" onclick="showTab('volume')">الحجم</div>
+  <div class="tab" data-tab="time" onclick="showTab('time')">الوقت</div>
+</div>
+
+<div class="container" id="converterContainer">
+  <!-- المحولات سيتم توليدها بالديناميكية عبر JavaScript -->
+</div>
+
+<script>
+/* ===============================
+  نصوص اللغات
+=============================== */
+const texts = {
+  ar: {title:"محول الوحدات الذكي", meta:"منصة ويب ذكية لتحويل جميع الوحدات مع واجهة جذابة.", 
+       length:"محول الطول", weight:"محول الوزن", temp:"محول الحرارة",
+       area:"محول المساحة", volume:"محول الحجم", time:"محول الوقت",
+       placeholder:"أدخل الرقم", button:"تحويل"},
+  en: {title:"Smart Unit Converter", meta:"Smart web platform for converting all units with attractive UI.",
+       length:"Length Converter", weight:"Weight Converter", temp:"Temperature Converter",
+       area:"Area Converter", volume:"Volume Converter", time:"Time Converter",
+       placeholder:"Enter value", button:"Convert"},
+  fr: {title:"Convertisseur d'unités intelligent", meta:"Plateforme web pour convertir toutes les unités avec interface attractive.",
+       length:"Convertisseur de longueur", weight:"Convertisseur de poids", temp:"Convertisseur de température",
+       area:"Convertisseur de surface", volume:"Convertisseur de volume", time:"Convertisseur de temps",
+       placeholder:"Entrez la valeur", button:"Convertir"},
+  es: {title:"Convertidor de unidades inteligente", meta:"Plataforma web para convertir todas las unidades con interfaz atractiva.",
+       length:"Convertidor de longitud", weight:"Convertidor de peso", temp:"Convertidor de temperatura",
+       area:"Convertidor de área", volume:"Convertidor de volumen", time:"Convertidor de tiempo",
+       placeholder:"Ingrese el valor", button:"Convertir"}
+};
+
+/* ===============================
+  Theme Settings
+=============================== */
+function changeTheme(){
+  const t=document.getElementById("themeSelector").value;
+  document.body.setAttribute("data-theme", t);
+}
+
+/* ===============================
+  Tabs
+=============================== */
+function showTab(tab){
+  const tabs=document.querySelectorAll(".tab");
+  tabs.forEach(t=>t.classList.remove("active"));
+  document.querySelector(`.tab[data-tab="${tab}"]`).classList.add("active");
+  generateConverters(tab);
+}
+
+/* ===============================
+  Generate Converters Dynamically
+=============================== */
+const convertersData = {
+  length:{units:{m:1, cm:0.01, km:1000, ft:0.3048, in:0.0254}},
+  weight:{units:{kg:1, g:0.001, lb:0.453592, oz:0.0283495}},
+  temperature:{units:{C:1,F:1,K:1}},
+  area:{units:{m2:1, km2:1000000, ft2:0.092903, ac:4046.86}},
+  volume:{units:{l:1, ml:0.001, m3:1000, gal:3.78541}},
+  time:{units:{s:1, min:60, h:3600, day:86400}}
+};
+
+function generateConverters(tab){
+  const container=document.getElementById("converterContainer");
+  container.innerHTML="";
+  const lang=document.getElementById("languageSelector").value;
+  const data=convertersData[tab];
+  
+  let card=document.createElement("div");
+  card.className="card";
+  let title=document.createElement("h3");
+  title.innerText=texts[lang][tab==="temperature"?"temp":tab];
+  card.appendChild(title);
+
+  let input=document.createElement("input");
+  input.type="number";
+  input.placeholder=texts[lang].placeholder;
+  input.id="valueInput";
+  card.appendChild(input);
+
+  let selectFrom=document.createElement("select");
+  selectFrom.id="fromUnit";
+  for(let u in data.units){
+    let opt=document.createElement("option"); opt.value=u; opt.innerText=u; selectFrom.appendChild(opt);
+  }
+  card.appendChild(selectFrom);
+
+  let selectTo=document.createElement("select");
+  selectTo.id="toUnit";
+  for(let u in data.units){
+    let opt=document.createElement("option"); opt.value=u; opt.innerText=u; selectTo.appendChild(opt);
+  }
+  card.appendChild(selectTo);
+
+  let btn=document.createElement("button");
+  btn.innerText=texts[lang].button;
+  btn.onclick=function(){convert(tab)};
+  card.appendChild(btn);
+
+  let result=document.createElement("div");
+  result.id="result"; card.appendChild(result);
+
+  container.appendChild(card);
+}
+
+/* ===============================
+  Convert Function
+=============================== */
+function convert(tab){
+  const val=parseFloat(document.getElementById("valueInput").value);
+  const from=document.getElementById("fromUnit").value;
+  const to=document.getElementById("toUnit").value;
+  const result=document.getElementById("result");
+  if(isNaN(val)){result.innerText=""; return;}
+  let conv=convertersData[tab].units;
+  let res;
+
+  if(tab==="temperature"){
+    let c;
+    if(from==="C") c=val;
+    if(from==="F") c=(val-32)*5/9;
+    if(from==="K") c=val-273.15;
+    if(to==="C") res=c;
+    if(to==="F") res=c*9/5+32;
+    if(to==="K") res=c+273.15;
+  }else{
+    res=val*conv[from]/conv[to];
+  }
+  result.innerText=res.toFixed(4);
+}
+
+/* ===============================
+  Language Change
+=============================== */
+function changeLanguage(){
+  const lang=document.getElementById("languageSelector").value;
+  document.getElementById("title").innerText=texts[lang].title;
+  document.getElementById("metaDescription").content=texts[lang].meta;
+  generateConverters(document.querySelector(".tab.active").dataset.tab);
+}
+
+/* ===============================
+  Initialize first tab
+=============================== */
+window.onload=function(){ generateConverters("length"); }
+
+</script>
+</body>
+</html>
